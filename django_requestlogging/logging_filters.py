@@ -87,7 +87,7 @@ class RequestFilter(object):
         # User
         user = getattr(request, 'user', None)
         if user and not user.is_anonymous():
-            record.username = user.username
+            record.username = user.user_uuid
         else:
             record.username = '-'
         # Headers
