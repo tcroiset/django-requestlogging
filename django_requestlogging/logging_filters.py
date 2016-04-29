@@ -40,6 +40,8 @@ also :class:`~.middleware.LogSetupMiddleware`.
    http://docs.python.org/2.6/library/logging.html#\
    adding-contextual-information-to-your-logging-output
 """
+import random
+import string
 
 
 class RequestFilter(object):
@@ -73,6 +75,9 @@ class RequestFilter(object):
         """Saves *request* (a WSGIRequest object) for later."""
         self.request = request
 
+    def _random_char(self, length):
+        return ''.join(random.choice(string.ascii_lowercase) for x in range(length))
+
     def filter(self, record):
         """
         Adds information from the request to the logging *record*.
@@ -82,6 +87,9 @@ class RequestFilter(object):
         """
         request = self.request
         # Basic
+        if request is not None and not hasattr(request, 'log_id'):
+            request.log_id = self._random_char(6)
+        record.request_log_id = getattr(request, 'log_id', '-')
         record.request_method = getattr(request, 'method', '-')
         record.path_info = getattr(request, 'path_info', '-')
         # User
@@ -95,4 +103,5 @@ class RequestFilter(object):
         record.remote_addr = META.get('REMOTE_ADDR', '-')
         record.server_protocol = META.get('SERVER_PROTOCOL', '-')
         record.http_user_agent = META.get('HTTP_USER_AGENT', '-')
+        record.query_string = META.get('QUERY_STRING', '-')
         return True
