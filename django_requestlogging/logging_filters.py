@@ -42,6 +42,7 @@ also :class:`~.middleware.LogSetupMiddleware`.
 """
 import random
 import string
+import threading
 
 
 class RequestFilter(object):
@@ -74,6 +75,7 @@ class RequestFilter(object):
     def __init__(self, request=None):
         """Saves *request* (a WSGIRequest object) for later."""
         self.request = request
+        self.thread = threading.current_thread().ident
 
     def _random_char(self, length):
         return ''.join(random.choice(string.ascii_lowercase) for x in range(length))
@@ -85,6 +87,8 @@ class RequestFilter(object):
         If certain information cannot be extracted from ``self.request``,
         a hyphen ``'-'`` is substituted as a placeholder.
         """
+        if self.thread != record.thread:
+            return True
         request = self.request
         # Basic
         if request is not None and not hasattr(request, 'log_id'):

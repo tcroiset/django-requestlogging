@@ -154,12 +154,14 @@ class LogSetupMiddleware(object):
         for handler in self.find_handlers_with_filter(filter_cls):
             handler.addFilter(f)
 
-    def remove_filter(self, f):
+    def remove_filter(self, request, f):
         """Remove filter *f* from all loggers."""
         for logger in self.find_loggers_with_filter(type(f)):
-            logger.removeFilter(f)
+            if f.request is request:
+                logger.removeFilter(f)
         for handler in self.find_handlers_with_filter(type(f)):
-            handler.removeFilter(f)
+            if f.request is request:
+                handler.removeFilter(f)
 
     def process_request(self, request):
         """Adds a filter, bound to *request*, to the appropriate loggers."""
@@ -170,11 +172,11 @@ class LogSetupMiddleware(object):
         """Removes this *request*'s filter from all loggers."""
         f = getattr(request, 'logging_filter', None)
         if f:
-            self.remove_filter(f)
+            self.remove_filter(request, f)
         return response
 
     def process_exception(self, request, exception):
         """Removes this *request*'s filter from all loggers."""
         f = getattr(request, 'logging_filter', None)
         if f:
-            self.remove_filter(f)
+            self.remove_filter(request, f)
