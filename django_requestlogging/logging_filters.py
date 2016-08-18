@@ -80,6 +80,16 @@ class RequestFilter(object):
     def _random_char(self, length):
         return ''.join(random.choice(string.ascii_lowercase) for x in range(length))
 
+    def _set_default_values(self, record):
+        record.request_log_id = '-'
+        record.request_method = '-'
+        record.path_info = '-'
+        record.username = '-'
+        record.remote_addr = '-'
+        record.server_protocol = '-'
+        record.http_user_agent = '-'
+        record.query_string = '-'
+
     def filter(self, record):
         """
         Adds information from the request to the logging *record*.
@@ -87,11 +97,12 @@ class RequestFilter(object):
         If certain information cannot be extracted from ``self.request``,
         a hyphen ``'-'`` is substituted as a placeholder.
         """
-        if self.thread != record.thread:
-            return True
         request = self.request
+        if self.thread != record.thread or request is None:
+            self._set_default_values(record)
+            return True
         # Basic
-        if request is not None and not hasattr(request, 'log_id'):
+        if not hasattr(request, 'log_id'):
             request.log_id = self._random_char(6)
         record.request_log_id = getattr(request, 'log_id', '-')
         record.request_method = getattr(request, 'method', '-')
