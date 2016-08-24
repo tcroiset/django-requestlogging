@@ -81,21 +81,15 @@ class RequestFilter(object):
         return ''.join(random.choice(string.ascii_lowercase) for x in range(length))
 
     def _set_default_values(self, record):
-        if self.thread != record.thread and self.request is None:
-            record.request_log_id = '+'
-        elif self.thread != record.thread:
-            record.request_log_id = '/'
-        elif self.request is None:
-            record.request_log_id = '*'
-        else:
-            record.request_log_id = '%'
-        record.request_method = '-'
-        record.path_info = '-'
-        record.username = '-'
-        record.remote_addr = '-'
-        record.server_protocol = '-'
-        record.http_user_agent = '-'
-        record.query_string = '-'
+        if not hasattr(record, 'request_log_id'):
+            record.request_log_id = '-'
+            record.request_method = '-'
+            record.path_info = '-'
+            record.username = '-'
+            record.remote_addr = '-'
+            record.server_protocol = '-'
+            record.http_user_agent = '-'
+            record.query_string = '-'
 
     def filter(self, record):
         """
