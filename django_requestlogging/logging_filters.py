@@ -110,10 +110,15 @@ class RequestFilter(object):
         record.path_info = getattr(request, 'path_info', '-')
         # User
         user = getattr(request, 'user', None)
-        if user and not user.is_anonymous():
-            record.username = user.user_uuid
-        else:
+        if hasattr(request, '_load_username_for_logging') and request._load_username_for_logging:
             record.username = '-'
+        else:
+            request._load_username_for_logging = True
+            if user and not user.is_anonymous():
+                record.username = user.user_uuid
+            else:
+                record.username = '-'
+            request._load_username_for_logging = False
         # Headers
         META = getattr(request, 'META', {})
         record.remote_addr = META.get('REMOTE_ADDR', '-')
