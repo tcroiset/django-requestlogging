@@ -33,6 +33,7 @@ Request logging middleware
 
 
 import logging
+import six
 
 from django_requestlogging.logging_filters import RequestFilter
 
@@ -94,7 +95,7 @@ class LogSetupMiddleware(object):
         # that are under ``self.root``.
         result = {}
         prefix = self.root + '.'
-        for name, logger in logging.Logger.manager.loggerDict.iteritems():
+        for name, logger in six.iteritems(logging.Logger.manager.loggerDict):
             if self.root and not name.startswith(prefix):
                 # Does not fall under self.root
                 continue
