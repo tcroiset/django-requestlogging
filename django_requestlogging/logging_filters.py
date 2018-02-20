@@ -115,7 +115,7 @@ class RequestFilter(object):
         else:
             request._load_username_for_logging = True
             if user and not user.is_anonymous():
-                record.username = user.user_uuid
+                record.username = getattr(user, 'user_uuid', '-')
             else:
                 record.username = '-'
             request._load_username_for_logging = False
