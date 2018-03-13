@@ -36,13 +36,14 @@ import logging
 import six
 
 from django_requestlogging.logging_filters import RequestFilter
+from django.utils.deprecation import MiddlewareMixin
 
 import weakref
 weakref_type = type(weakref.ref(lambda: None))
 def deref(x):
     return x() if x and type(x) == weakref_type else x
 
-class LogSetupMiddleware(object):
+class LogSetupMiddleware(MiddlewareMixin):
     """
     Adds :class:`.logging_filters.RequestFilter` to every request.
 
@@ -84,9 +85,6 @@ class LogSetupMiddleware(object):
     """
     FILTER = RequestFilter
 
-    def __init__(self, root=''):
-        self.root = root
-
     def find_loggers(self):
         """
         Returns a :class:`dict` of names and the associated loggers.
@@ -94,14 +92,11 @@ class LogSetupMiddleware(object):
         # Extract the full logger tree from Logger.manager.loggerDict
         # that are under ``self.root``.
         result = {}
-        prefix = self.root + '.'
+        prefix = '.'
         for name, logger in six.iteritems(logging.Logger.manager.loggerDict):
-            if self.root and not name.startswith(prefix):
-                # Does not fall under self.root
-                continue
             result[name] = logger
         # Add the self.root logger
-        result[self.root] = logging.getLogger(self.root)
+        result[''] = logging.getLogger('')
         return result
 
     def find_handlers(self):
