@@ -83,6 +83,7 @@ class RequestFilter(object):
     def _set_default_values(self, record):
         if not hasattr(record, 'request_log_id'):
             record.request_log_id = '-'
+            record.request_log_count = '-'
             record.request_method = '-'
             record.path_info = '-'
             record.username = '-'
@@ -106,6 +107,11 @@ class RequestFilter(object):
         if not hasattr(request, 'log_id'):
             request.log_id = self._random_char(6)
         record.request_log_id = getattr(request, 'log_id', '-')
+        if not hasattr(request, 'log_count'):
+            request.log_count = 0
+        else:
+            request.log_count += 1
+        record.request_log_count = request.log_count
         record.request_method = getattr(request, 'method', '-')
         record.path_info = getattr(request, 'path_info', '-')
         # User
