@@ -75,7 +75,11 @@ class RequestFilter(object):
     def __init__(self, request=None):
         """Saves *request* (a WSGIRequest object) for later."""
         self.request = request
-        self.thread = threading.current_thread().ident
+        self.threads = [threading.current_thread().ident]
+
+    def add_thread(self, thread):
+        if thread not in self.threads:
+            self.threads.append(thread)
 
     def _random_char(self, length):
         return ''.join(random.choice(string.ascii_lowercase) for x in range(length))
@@ -100,7 +104,7 @@ class RequestFilter(object):
         a hyphen ``'-'`` is substituted as a placeholder.
         """
         request = self.request
-        if self.thread != record.thread or request is None:
+        if record.thread not in (self.threads) or request is None:
             self._set_default_values(record)
             return True
         # Basic
